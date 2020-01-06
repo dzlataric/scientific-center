@@ -1,0 +1,19 @@
+HELP.md
+scientific-center/target/
+scientific-center/.mvn/wrapper/maven-wrapper.jar
+!scientific-center/src/main/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr

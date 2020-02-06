@@ -1,8 +1,9 @@
 package com.scientific.center.registration;
 
-import org.springframework.stereotype.Service;
+import com.scientific.center.process.FormFields;
 
-@Service
-public class RegistrationService {
+public interface RegistrationService {
+
+	FormFields startRegistrationProcess();
 
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_03r4mnm" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.4.1">
-  <bpmn:process id="Process_1qa4yt2" isExecutable="true">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_03r4mnm" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="user-registration" isExecutable="true">
     <bpmn:startEvent id="StartRegistration">
       <bpmn:outgoing>SequenceFlow_1d3hnwc</bpmn:outgoing>
     </bpmn:startEvent>
@@ -46,6 +46,7 @@
           </camunda:formField>
           <camunda:formField id="reviewer" label="Reviewer" type="boolean" />
         </camunda:formData>
+        <camunda:taskListener class="com.scientific.center.registration.RegistrationInitializer" event="create" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_1d3hnwc</bpmn:incoming>
       <bpmn:incoming>invalidRegistrationInfo</bpmn:incoming>
@@ -78,7 +79,7 @@
       <bpmn:outgoing>SequenceFlow_0c8g8f8</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="SequenceFlow_039gqrh" sourceRef="sendRegistrationEmail" targetRef="confirmRegistration" />
-    <bpmn:serviceTask id="enableUserAccount" name="Enable user account">
+    <bpmn:serviceTask id="enableUserAccount" name="Enable user account" camunda:class="com.scientific.center.registration.EnableUserAccount">
       <bpmn:incoming>SequenceFlow_0c8g8f8</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1nxicb6</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -91,7 +92,8 @@
     <bpmn:sequenceFlow id="SequenceFlow_1nxicb6" sourceRef="enableUserAccount" targetRef="ExclusiveGateway_06mbz6q" />
     <bpmn:endEvent id="EndEvent_0clnlf5">
       <bpmn:incoming>userIsNotAReviewer</bpmn:incoming>
-      <bpmn:incoming>SequenceFlow_0dk5glh</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0hpp0p4</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0t9a7a1</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="userIsNotAReviewer" name="User is not a reviewer" sourceRef="ExclusiveGateway_06mbz6q" targetRef="EndEvent_0clnlf5">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!reviewer}</bpmn:conditionExpression>
@@ -101,17 +103,28 @@
     </bpmn:sequenceFlow>
     <bpmn:userTask id="confirmReviewer" name="Confirm reviewer" camunda:assignee="admin">
       <bpmn:incoming>userIsAReviewer</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_1t2q92t</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1gldm1l</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:task id="enableReviewerAccount" name="Enable reviewer account">
-      <bpmn:incoming>SequenceFlow_1t2q92t</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0dk5glh</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:sequenceFlow id="SequenceFlow_1t2q92t" sourceRef="confirmReviewer" targetRef="enableReviewerAccount" />
-    <bpmn:sequenceFlow id="SequenceFlow_0dk5glh" sourceRef="enableReviewerAccount" targetRef="EndEvent_0clnlf5" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0hm550o">
+      <bpmn:incoming>SequenceFlow_1gldm1l</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0nh3945</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0hpp0p4</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_1gldm1l" sourceRef="confirmReviewer" targetRef="ExclusiveGateway_0hm550o" />
+    <bpmn:sequenceFlow id="SequenceFlow_0nh3945" sourceRef="ExclusiveGateway_0hm550o" targetRef="enableReviewerAccount">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${reviewerApproved}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0hpp0p4" name="Reviewer not approved" sourceRef="ExclusiveGateway_0hm550o" targetRef="EndEvent_0clnlf5">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!reviewerApproved}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0t9a7a1" sourceRef="enableReviewerAccount" targetRef="EndEvent_0clnlf5" />
+    <bpmn:serviceTask id="enableReviewerAccount" name="Enable reviewer account" camunda:class="com.scientific.center.registration.EnableReviewerAccount">
+      <bpmn:incoming>SequenceFlow_0nh3945</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0t9a7a1</bpmn:outgoing>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1qa4yt2">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="user-registration">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartRegistration">
         <dc:Bounds x="179" y="79" width="36" height="36" />
       </bpmndi:BPMNShape>
@@ -196,17 +209,32 @@
       <bpmndi:BPMNShape id="UserTask_10bhmd1_di" bpmnElement="confirmReviewer">
         <dc:Bounds x="400" y="370" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_04hlzvj_di" bpmnElement="enableReviewerAccount">
-        <dc:Bounds x="147" y="370" width="100" height="80" />
+      <bpmndi:BPMNShape id="ExclusiveGateway_0hm550o_di" bpmnElement="ExclusiveGateway_0hm550o" isMarkerVisible="true">
+        <dc:Bounds x="295" y="385" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_1t2q92t_di" bpmnElement="SequenceFlow_1t2q92t">
+      <bpmndi:BPMNEdge id="SequenceFlow_1gldm1l_di" bpmnElement="SequenceFlow_1gldm1l">
         <di:waypoint x="400" y="410" />
+        <di:waypoint x="345" y="410" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0nh3945_di" bpmnElement="SequenceFlow_0nh3945">
+        <di:waypoint x="295" y="410" />
         <di:waypoint x="247" y="410" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_0dk5glh_di" bpmnElement="SequenceFlow_0dk5glh">
+      <bpmndi:BPMNEdge id="SequenceFlow_0hpp0p4_di" bpmnElement="SequenceFlow_0hpp0p4">
+        <di:waypoint x="320" y="385" />
+        <di:waypoint x="320" y="290" />
+        <di:waypoint x="215" y="290" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="327" y="317" width="66" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0t9a7a1_di" bpmnElement="SequenceFlow_0t9a7a1">
         <di:waypoint x="197" y="370" />
         <di:waypoint x="197" y="308" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_03h6593_di" bpmnElement="enableReviewerAccount">
+        <dc:Bounds x="147" y="370" width="100" height="80" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

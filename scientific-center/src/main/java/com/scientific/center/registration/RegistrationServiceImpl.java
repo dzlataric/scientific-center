@@ -2,8 +2,11 @@ package com.scientific.center.registration;
 
 import com.scientific.center.process.FormField;
 import com.scientific.center.process.FormFields;
+import com.scientific.center.process.FormSubmission;
 import com.scientific.center.utils.ProcessUtils;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.camunda.bpm.engine.FormService;
@@ -46,6 +49,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 					.build())
 				.collect(Collectors.toList()))
 			.build();
+	}
+
+	@Override
+	public void submitRegistrationForm(final List<FormSubmission> request, final String taskId) {
+		formService.submitTaskForm(taskId, request.stream()
+			.collect(HashMap::new, (map, field) -> map.put(field.getFieldId(), field.getFieldValue()), HashMap::putAll));
+		log.info("Submitted registration form for task with id: {}", taskId);
 	}
 
 }

@@ -29,7 +29,6 @@ public class MagazineInitializer implements TaskListener {
 			.filter(ff -> ff.getType() instanceof CollectionFormType)
 			.forEach(ff -> {
 				if (ff.getId().equals("selectedAreas")) {
-					ff.
 					areaOfScienceRepository.findAll().forEach(aose -> {
 						((CollectionFormType) ff.getType()).getValues().put(aose.getKey(), aose.getName());
 					});

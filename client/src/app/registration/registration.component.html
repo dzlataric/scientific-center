@@ -1,0 +1,43 @@
+<div>
+  <form [formGroup]="registrationForm" (ngSubmit)="submitRegistrationForm()">
+    <div *ngFor="let ff of formFields" class="input-group mb-3">
+      <div [ngSwitch]="ff.type.name">
+        <div class="form-group row" *ngSwitchCase="'string'">
+          <div class="col-sm-12">
+            <input type="text" class="form-control" placeholder="{{ff.label}}">
+          </div>
+        </div>
+        <div class="form-group row" *ngSwitchCase="'password'">
+          <div class="col-sm-12">
+            <input type="password" class="form-control" placeholder="{{ff.label}}">
+          </div>
+        </div>
+        <fieldset class="form-group" *ngSwitchCase="'enum'">
+          <hr>
+          <div class="row">
+            <div class="col-sm-10">
+              <div class="form-check" *ngFor="let item of ff.type.values | keyvalue">
+                <input class="form-check-input" type="checkbox" id="{{item.key}}">
+                <label class="form-check-label" for={{item.key}}>{{item.key}}:{{item.value}}</label>
+              </div>
+            </div>
+          </div>
+          <hr>
+        </fieldset>
+        <div class="form-group row" *ngSwitchCase="'boolean'">
+          <div class="row col-sm-10">
+            <div class="form-check">
+              <div class="col-sm-2">{{ff.label}}</div>
+              <input class="form-check-input" type="checkbox">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-sm-10">
+        <button type="submit" class="btn btn-primary">Sign in</button>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,14 +1,19 @@
 package com.scientific.center.model;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
@@ -62,12 +67,21 @@ public class UserEntity {
 	private Boolean reviewer;
 
 	@Column(name = "ENABLED")
-	private boolean enabled;
+	private Boolean enabled;
 
 	@Column(name = "ENABLED_AS_REVIEWER")
-	private boolean enabledAsReviewer;
+	private Boolean enabledAsReviewer;
 
 	@ManyToMany
-	private Set<AreaOfScienceEntity> areasOfScience;
+	@JoinTable(name = "T_USER_AREA_OF_SCIENCE",
+		joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID"),
+		inverseJoinColumns = @JoinColumn(name = "AREA_OF_SCIENCE_ID", referencedColumnName = "ID"))
+	private List<AreaOfScienceEntity> areasOfScience = new ArrayList<>();
+
+	@ManyToMany(mappedBy = "reviewers", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<MagazineEntity> reviewingMagazines = new ArrayList<>();
+
+	@ManyToMany(mappedBy = "editors", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<MagazineEntity> editingMagazines = new ArrayList<>();
 
 }

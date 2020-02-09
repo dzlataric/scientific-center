@@ -7,7 +7,11 @@ import com.scientific.center.utils.ProcessUtils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.BadRequestException;
 
 import org.camunda.bpm.engine.FormService;
 import org.camunda.bpm.engine.IdentityService;
@@ -42,10 +46,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 			.taskId(task.getId())
 			.formFields(taskFormData.getFormFields()
 				.stream()
-				.map(tfd -> FormField.builder()
-					.id(tfd.getId())
-					.label(tfd.getLabel())
-					.type(tfd.getType().getName())
+				.map(ff -> FormField.builder()
+					.id(ff.getId())
+					.label(ff.getLabel())
+					.type(ff.getType())
+					.value(ff.getValue().getValue())
+					.validationConstraints(ff.getValidationConstraints())
 					.build())
 				.collect(Collectors.toList()))
 			.build();
@@ -53,9 +59,20 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 	@Override
 	public void submitRegistrationForm(final List<FormSubmission> request, final String taskId) {
-		formService.submitTaskForm(taskId, request.stream()
-			.collect(HashMap::new, (map, field) -> map.put(field.getFieldId(), field.getFieldValue()), HashMap::putAll));
+		Map<String, Object> fieldsMap = request.stream()
+			.collect(HashMap::new, (map, field) -> map.put(field.getFieldId(), field.getFieldValue()), HashMap::putAll);
+		formService.submitTaskForm(taskId, fieldsMap);
 		log.info("Submitted registration form for task with id: {}", taskId);
+	}
+
+	@Override
+	public void confirmRegistration(final String id) {
+		Optional.ofNullable(taskService.createTaskQuery()
+			.processInstanceId(id)
+			.active()
+			.singleResult()).ifPresentOrElse(t -> taskService.complete(t.getId()), () -> {
+			throw new BadRequestException(String.format("No tasks found for process with id %s", id));
+		});
 	}
 
 }

@@ -40,4 +40,11 @@ public class RegistrationController {
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
+	@GetMapping(value = "/confirm/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<HttpStatus> confirmRegistration(@PathVariable String id) {
+		log.info("Confirming registration for process with id {}", id);
+		registrationService.confirmRegistration(id);
+		return ResponseEntity.accepted().build();
+	}
+
 }

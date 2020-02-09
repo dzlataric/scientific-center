@@ -11,4 +11,6 @@ public interface RegistrationService {
 
 	void submitRegistrationForm(List<FormSubmission> request, String taskId);
 
+	void confirmRegistration(String id);
+
 }

@@ -1,15 +1,16 @@
 package com.scientific.center.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AccessLevel;
@@ -39,5 +40,7 @@ public class AreaOfScienceEntity {
 	@Column(name = "KEY", nullable = false)
 	private String key;
 
+	@ManyToMany(mappedBy = "areasOfScience", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<UserEntity> users = new ArrayList<>();
 
 }

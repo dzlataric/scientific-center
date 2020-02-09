@@ -19,22 +19,26 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class SendRegistrationEmail implements JavaDelegate {
 
+	private static final String BASE_URL = "http://localhost:8090/registration/confirm/";
+
 	private final JavaMailSender mailSender;
 
 	@Override
 	public void execute(final DelegateExecution delegateExecution) throws Exception {
-		log.info("Sending registration email");
+		final var emailAddress = delegateExecution.getVariable("email").toString();
+		log.info("Sending registration email to {}", emailAddress);
 		try {
 			MimeMessage mail = mailSender.createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(mail, false, StandardCharsets.UTF_8.name());
-			helper.setTo("zlatara.92@gmail.com");
+			helper.setTo(emailAddress);
 			helper.setFrom("timsedamnaest@gmail.com");
 			helper.setSubject("Account Activation");
-			String message = "To activate your account " + "<a href=\"" + delegateExecution.getProcessInstanceId() + "\">click here.</a><br><br>";
+			String message =
+				"To activate your account " + "<a href=\"" + BASE_URL.concat(delegateExecution.getProcessInstanceId()) + "\">click here.</a><br><br>";
 			helper.setText(message, true);
 			mailSender.send(mail);
 		} catch (Exception e) {
-			log.error("Error sending email \n {}", ExceptionUtils.getStackTrace(e));
+			log.error("Error sending email to {} \n {}", emailAddress, ExceptionUtils.getStackTrace(e));
 			throw e;
 		}
 	}

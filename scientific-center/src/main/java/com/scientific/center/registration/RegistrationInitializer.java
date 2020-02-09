@@ -1,18 +1,13 @@
 package com.scientific.center.registration;
 
 import com.scientific.center.repository.AreaOfScienceRepository;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.scientific.center.utils.CollectionFormType;
 
 import javax.transaction.Transactional;
 
 import org.camunda.bpm.engine.FormService;
 import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.camunda.bpm.engine.delegate.TaskListener;
-import org.camunda.bpm.engine.form.FormField;
-import org.camunda.bpm.engine.form.FormType;
-import org.camunda.bpm.engine.impl.form.type.EnumFormType;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
@@ -29,9 +24,14 @@ public class RegistrationInitializer implements TaskListener {
 
 	@Override
 	public void notify(final DelegateTask delegateTask) {
-		log.info("Preregistration listener called!");
+		log.info("Executing pre-registration listener");
 		final var formFields = formService.getTaskFormData(delegateTask.getId()).getFormFields();
-		final var all = areaOfScienceRepository.findAll();
-		log.info("STOP");
+		formFields.stream()
+			.filter(ff -> ff.getType() instanceof CollectionFormType)
+			.forEach(ff -> {
+				areaOfScienceRepository.findAll().forEach(aose -> {
+					((CollectionFormType) ff.getType()).getValues().put(aose.getKey(), aose.getName());
+				});
+			});
 	}
 }

@@ -8,6 +8,6 @@ import lombok.Value;
 public class FormSubmission {
 
 	private String fieldId;
-	private String fieldValue;
+	private Object fieldValue;
 
 }

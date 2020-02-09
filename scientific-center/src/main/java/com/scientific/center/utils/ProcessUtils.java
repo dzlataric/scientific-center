@@ -6,5 +6,6 @@ import lombok.experimental.UtilityClass;
 public class ProcessUtils {
 
 	public static final String USER_REGISTRATION_PROCESS = "user-registration";
+	public static final String MAGAZINE_REGISTRATION_PROCESS = "magazine-registration";
 
 }
